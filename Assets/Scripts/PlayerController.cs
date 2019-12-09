@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class PlayerController : MonoBehaviour {
+using Mirror;
+
+public class PlayerController : NetworkBehaviour {
 
     [SerializeField]
     float movementSpeed = 3f; // Unity-enheter per sekund
@@ -18,6 +20,11 @@ public class PlayerController : MonoBehaviour {
 
     float timeBetweenShots = 0.5f;
     float timeSinceLastShot = 0f;
+
+    public override void OnStartLocalPlayer()
+    {
+        GetComponent<Renderer>().material.color = Color.green;
+    }
 	
 	void Update () {
 
@@ -36,15 +43,18 @@ public class PlayerController : MonoBehaviour {
         {
             if (timeSinceLastShot > timeBetweenShots)
             {
-                Fire();
+                CmdFire();
                 timeSinceLastShot = 0;
             }
         }
 
 	}
 
-    void Fire()
+    [Command]
+    void CmdFire()
     {
         GameObject bullet = Instantiate(bulletPrefab, bulletSpawnPoint.position, bulletSpawnPoint.rotation);
+
+        NetworkServer.Spawn(bullet);
     }
 }
